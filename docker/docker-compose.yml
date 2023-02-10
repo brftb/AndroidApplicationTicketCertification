@@ -1,0 +1,41 @@
+version: '3'
+services:
+  # nodeで構成するAPIサーバコンテナ
+  web:
+    image: node:alpine3.16
+    container_name: web-server
+    ports:
+      - 3000:3000
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./containers/web/app/:/usr/src/app
+    working_dir: /usr/src/app
+    command: >
+      sh -c 'npm install -g npm@9.4.1 &&
+      node /usr/src/app/bin/www'
+    networks:
+      - web
+
+  # dbコンテナ
+  maria-db:
+    image: mariadb:10.11-rc
+    container_name: db-server
+    restart: always
+    volumes:
+      - ./db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - web
+    ports:
+      - '3306:3306'
+    stdin_open: true
+    tty: true
+
+volumes:
+  db_data:
+
+networks:
+  web:
+    external: true
