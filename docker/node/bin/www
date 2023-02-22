@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+// httpServerモジュール宣言
+const {app} = require('../app_modules');
+const server = require('http').createServer(app);
+
+const config = require('../config');
+const port = config.port;
+
+
+// router
+const sellerRouter = require('../routes/seller');
+const purchaserRouter = require('../routes/purchaser');
+const qrRouter = require('../routes/qr');
+
+app.use('/seller/qr', qrRouter);
+app.use('/purchaser/qr', qrRouter);
+
+app.use('/seller', sellerRouter);
+app.use('/purchaser', purchaserRouter);
+
+
+// server on
+server.listen(port);
+console.log(`サーバが起動しました: ${port}`);
