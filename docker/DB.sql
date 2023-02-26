@@ -63,6 +63,7 @@ FROM events e
   ON r.R_event_id = e.E_id
 WHERE e.E_delete_flag = 0
   AND e.E_public_flag = 1
+  AND r.R_remain_num > 0
   AND e.E_datetime > now()
 ORDER BY e.E_datetime ASC
   ;

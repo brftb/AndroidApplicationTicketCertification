@@ -90,7 +90,7 @@ module.exports = {
       let insert1Id;
       
       await connection.beginTransaction()
-      const [rows, fields] = await connection.query("INSERT INTO events (E_name, E_datetime, E_ticket_sum, E_description, E_public_flag, E_delete_flag) VALUES(?, ?, ?, ?, 1, 0)", [name, datetime, ticket_sum,description])
+      const [rows, fields] = await connection.query("INSERT INTO events (E_name, E_datetime, E_ticket_sum, E_description, E_public_flag, E_delete_flag) VALUES(?, ?, ?, ?, 0, 0)", [name, datetime, ticket_sum,description])
       insert1Id = rows.insertId;
       await connection.query("INSERT INTO remains (R_event_id, R_remain_num) VALUES(?, ?)", [insert1Id, ticket_sum])
       await connection.commit()
