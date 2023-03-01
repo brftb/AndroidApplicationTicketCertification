@@ -10,6 +10,7 @@ qrRouter
   .get('/display', async (req, res, next) => {
     const param = req.query;
     const event_id = param.eventId;
+    const seat_id = param.seatId;
     const mynumber = param.mynumber;
 
     //現在日時と期限日時
@@ -24,7 +25,7 @@ qrRouter
     for ( var i = 0; i < N; i++ ) {
       rand_str += S.charAt(Math.floor(Math.random() * S.length));
     }
-    let code = mynumber + currentTime + rand_str + event_id;
+    let code = seat_id + mynumber + currentTime + rand_str + event_id;
 
     // 生成したコードを保存
     ls.set(mynumber,rand_str)
@@ -37,36 +38,44 @@ qrRouter
 
 // スキャンしたコードを認証
   .post('/scan', async (req, res, next) => {
-    const eventId = req.body.eventId;
-    const readCode = req.body.code;
-    const mynumberLength = readCode.split(']',1)[0].length + 1;
-    const readMynumber = readCode.slice(0,mynumberLength);
-    const readDatetime = readCode.slice(mynumberLength,mynumberLength+14);
-    const readRand_str = readCode.slice(mynumberLength+14,mynumberLength+14+16);
-    const readEventId = readCode.slice(mynumberLength+14+16);
-
     let resultStatus = '';
-    //現在日時と期限日時
+    // 現在日時と期限日時
     const currentTime = new Date();
     const createTime = ls(readMynumber+"period");
-    // 期限切れのQRコードでないことを確認
-    if(createTime < currentTime){
-      resultStatus = 'expired'
-    }else{
-      // 保存してあるコードと比較
-      if(readRand_str == ls(readMynumber) && readEventId == eventId){
-        // DB
-        let tf = await TicketDao.useTicket(readEventId,readMynumber);
-        if(tf){
-          resultStatus = 'ok';
-          // 保存してあるコードを削除
-          ls.remove(readMynumber)
+    if(createTime != null){
+      const eventId = req.body.eventId;
+      const readCode = req.body.code;
+      const seatIdLength = readCode.split('[',1)[0].length;
+      const mynumberLength = readCode.split(']',1)[0].length + 1 - seatIdLength;
+      const readSeatId = readCode.slice(0,seatIdLength);
+      const readMynumber = readCode.slice(seatIdLength,seatIdLength+mynumberLength);
+      const readDatetime = readCode.slice(seatIdLength+mynumberLength,seatIdLength+mynumberLength+14);
+      const readRand_str = readCode.slice(seatIdLength+mynumberLength+14,seatIdLength+mynumberLength+14+16);
+      const readEventId = readCode.slice(seatIdLength+mynumberLength+14+16);
+
+      // 使用済みでないことを確認
+      let tf = await TicketDao.checkUsed(readEventId,readSeatId,readMynumber);
+      if(tf){
+        // 期限切れのQRコードでないことを確認
+        if(createTime < currentTime){
+          resultStatus = 'expired'
         }else{
-          resultStatus = 'err';
+          // 保存してあるコードと比較
+          if(readRand_str == ls(readMynumber) && readEventId == eventId){
+            // DB
+            let tf = await TicketDao.useTicket(readEventId,readSeatId,readMynumber);
+            if(tf){
+              resultStatus = 'ok';
+              // 保存してあるコードを削除
+              ls.remove(readMynumber)
+            }else{
+              resultStatus = 'err';
+            }
+          }
         }
-      }else{
-        resultStatus = 'ng';
       }
+    }else{
+      resultStatus = 'ng';
     }
 
     // return json
