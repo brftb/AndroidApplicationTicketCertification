@@ -9,9 +9,9 @@ eventRouter
   .get('/list', async (req, res, next) => {
     let eventsList = await EventDao.findAll();
     // return json
-    res.json({
-      list: eventsList
-    });
+    if(eventsList == null) res.json({ status : "4", });
+    else if(eventsList.length == 0) res.json({ status : "1" });
+    else res.json({ status : "2", list: eventsList });
   })
 
 // イベント詳細情報

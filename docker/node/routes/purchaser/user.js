@@ -18,11 +18,11 @@ userRouter
 // 購入済チケット表示
   .get('/mypage', async (req, res, next) => {
     const param = req.query;
-    let eventsList = await ViewShowTicketDao.findByMynumber(param.mynumber);
+    let ticketsList = await ViewShowTicketDao.findByMynumber(param.mynumber);
     // return json
-    res.json({
-      list: eventsList
-    });
+    if(ticketsList == null) res.json({ status : "4" });
+    else if(ticketsList.length == 0) res.json({ status : "1" });
+    else res.json({ status : "2", list : ticketsList });
   })
 
 // アカウント登録済かのチェック

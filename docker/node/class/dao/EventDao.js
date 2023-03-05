@@ -11,10 +11,9 @@ module.exports = {
    */
   findAll: async function () {
     let result;
-    // sql
+    const pool = mysql.createPool(dbConf);
     const sql = `SELECT * FROM events WHERE E_delete_flag = 0`;
     // select実行
-    const pool = mysql.createPool(dbConf);
     try{
       const [rows, fields] = await pool.query(sql);
       // データの加工処理&データ返す処理
@@ -22,19 +21,11 @@ module.exports = {
         result = rows;
       }
       else{
-        const sampleRows = [{
-          E_id : "1",
-          E_name : "イベント名てすと",
-          E_datetime : "2023年03月19日 03時00分",
-          E_ticket_sum : "444",
-          E_description : "テストテキストテストテキストテストテキストテストテキストテストテキストテストテキストテストテキスト",
-          E_public_flag : "1",
-          E_delete_flag : "0"
-        }]
-        result = sampleRows;
+        result = []; // 空配列
       }
     } catch (err) {
       console.log(err);
+      result = null;
     } finally {
       pool.end();
     }
@@ -88,7 +79,6 @@ module.exports = {
 
     try{
       let insert1Id;
-      
       await connection.beginTransaction()
       const [rows, fields] = await connection.query("INSERT INTO events (E_name, E_datetime, E_ticket_sum, E_description, E_public_flag, E_delete_flag) VALUES(?, ?, ?, ?, 0, 0)", [name, datetime, ticket_sum,description])
       insert1Id = rows.insertId;

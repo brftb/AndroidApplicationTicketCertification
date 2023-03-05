@@ -22,17 +22,11 @@ module.exports = {
         result = rows;
       }
       else{
-        const sampleRows = [{
-          E_id : "999",
-          E_name : "イベント名てすと",
-          E_datetime : "2023年03月19日 03時00分",
-          R_num : "444",
-          E_description : "テストテキストテストテキストテストテキストテストテキストテストテキストテストテキストテストテキスト"
-        }]
-        result = sampleRows;
+        result = [];
       }
     } catch (err) {
       console.log(err);
+      result = null;
     } finally {
       pool.end();
     }

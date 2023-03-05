@@ -21,19 +21,11 @@ module.exports = {
         result = rows;
       }
       else{
-        const sampleRows = [{
-          E_id : "99",
-          E_name : "test",
-          E_datetime : "2023年03月19日 03時00分",
-          E_description : "テストテキストテストテキストテストテキストテストテキストテストテキストテストテキストテストテキスト",
-          T_seat_id : "55",
-          T_mynumber : "0123456789",
-          T_used_flag : "0"
-        }]
-        result = sampleRows;
+        result = []; // 空配列
       }
     } catch (err) {
       console.log(err);
+      result = null;
     } finally {
       pool.end();
     }
